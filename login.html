@@ -52,12 +52,12 @@
     const username = formData.get('username');
     const password = formData.get('password');
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/users/login/`, {
+      const response = await axios.post(`http://127.0.0.1:8000/login/`, {
         username: username,
         password: password,
       });
       const accessToken = response.data.access;
-      sessionStorage.setItem('access_token', accessToken);
+      localStorage.setItem('access_token', accessToken);
       alert('logged in succesfully');
       window.location.href = 'index.html';
     } catch (error) {
