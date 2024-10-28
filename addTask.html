@@ -44,18 +44,20 @@
   </body>
 </html>
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    getUsers();
+  });
   const userSelect = document.getElementById('userSelect');
   const form = document.getElementById('addTaskForm');
   const getUsers = async () => {
-    const response = await axios.get(`http://127.0.0.1:8000/users/`);
-    const users = response.data;
+    const users = await apiRequest(`http://127.0.0.1:8000/users/`);
     let optionHTML = ``;
     users.map((user) => {
       optionHTML += `<option value=${user.id}>${user.username}</option>`;
     });
     userSelect.innerHTML = optionHTML;
   };
-  getUsers();
+
   const addTask = async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
