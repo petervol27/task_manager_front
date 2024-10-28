@@ -25,7 +25,7 @@
   <body class="text-center">
     <div class="d-flex justify-content-end" id="loginIcon"></div>
     <h1>Add Task</h1>
-    <a class="btn btn-primary mb-3" href="./index.html">Go Back</a>
+    <a class="btn btn-primary mb-3" href="./tasks.html">Go Back</a>
     <form class="w-50 mx-auto bg-light p-3" id="addTaskForm">
       <div class="w-50 mx-auto mb-3">
         <label for="name" class="form-label">Task Name:</label>
@@ -62,14 +62,14 @@
     const name = formData.get('name');
     const deadline = formData.get('deadline');
     const userId = formData.get('userSelect');
-    console.log(userId);
-    const response = await axios.post('http://127.0.0.1:8000/tasks/', {
-      name: name,
-      deadline: deadline,
-      user: userId,
-    });
-    alert(response.data);
-    window.location.href = 'index.html';
+    const taskData = { name: name, deadline: deadline, user: userId };
+    const response = await apiRequest(
+      'http://127.0.0.1:8000/tasks/',
+      'POST',
+      taskData
+    );
+    alert(response);
+    window.location.href = 'tasks.html';
   };
   form.addEventListener('submit', addTask);
 </script>

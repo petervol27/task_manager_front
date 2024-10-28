@@ -1,23 +1,69 @@
-// const loginIcon = document.getElementById('loginIcon');
-// const fetchUser = async (accessToken) => {
-//   const response = await axios.get('http://127.0.0.1:8000/users/fetch_user/', {
-//     headers: { Authorization: `Bearer ${accessToken}` },
-//     withCredentials: true,
-//   });
-//   const userData = response.data;
-//   return userData;
-// };
-// const checkLogin = async () => {
-//   const accessToken = sessionStorage.getItem('access_token');
-//   if (accessToken) {
-//     const userData = await fetchUser(accessToken);
-//     loginIcon.innerHTML = `<div class="d-flex justify-content-center align-items-center m-3 gap-3"><p class="m-0">Hello <strong>${userData.username}</strong></p><a href="./myTasks.html?user=${userData.id}" class=" btn btn-primary ">
-//         My Tasks
-//       </a><a class="btn btn-danger" id="logoutBtn">Logout</a></div>`;
-//   } else {
-//     loginIcon.innerHTML = `<a href="./login.html" class="btn-primary">
-//         <i class="bi bi-person-circle me-5" style="font-size: 24px"></i>
-//       </a>`;
-//   }
-// };
-// window.onload = checkLogin;
+const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem('refresh_token');
+  const response = await axios.post('http://127.0.0.1:8000/refresh/', {
+    refresh: refreshToken,
+  });
+  const newAccessToken = response.data.access;
+  localStorage.setItem('access_token', newAccessToken);
+  return newAccessToken;
+};
+
+const apiRequest = async (url, method = 'GET', data = null) => {
+  let accessToken = localStorage.getItem('access_token');
+  try {
+    const response = await axios({
+      url,
+      method,
+      data,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response.status === 401) {
+      accessToken = await refreshAccessToken();
+      if (!accessToken) return;
+      const retryResponse = await axios({
+        url,
+        method,
+        data,
+        headers: { Authorization: `Bearer ${accessToken}` },
+        withCredentials: true,
+      });
+      return retryResponse.data;
+    } else {
+      throw error;
+    }
+  }
+};
+const loginIcon = document.getElementById('loginIcon');
+const fetchUser = async (accessToken) => {
+  try {
+    const userData = await apiRequest(
+      'http://127.0.0.1:8000/users/fetch_user/'
+    );
+    return userData;
+  } catch (error) {
+    return null;
+  }
+};
+const checkLogin = async () => {
+  const accessToken = localStorage.getItem('access_token');
+  if (accessToken) {
+    const userData = await fetchUser(accessToken);
+    loginIcon.innerHTML = `<div class="d-flex justify-content-center align-items-center m-3 gap-3"><p class="m-0">Hello <strong>${userData.username}</strong></p><a class="btn btn-danger" id="logoutBtn">Logout</a></div>`;
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+  } else {
+    if (window.location.pathname != '/index.html') {
+      window.location.href = 'index.html';
+    }
+  }
+};
+const logout = async () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  alert('logged out!');
+  window.location.href = 'index.html';
+};
+
+window.onload = checkLogin;

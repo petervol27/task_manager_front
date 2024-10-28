@@ -24,32 +24,28 @@
   </head>
   <body class="text-center">
     <div class="d-flex justify-content-end" id="loginIcon"></div>
-    <h1>My Tasks</h1>
-    <a class="btn btn-primary mb-3" href="./index.html">Go Back</a>
+    <h1>Welcome to the Task Manager</h1>
+    <a class="btn btn-primary mb-3" href="./addTask.html">Add Task</a>
     <ul class="list-group w-25 mx-auto" id="tasksList"></ul>
   </body>
 </html>
 <script>
-  const tasksList = document.getElementById('tasksList');
-  const urlParams = new URLSearchParams(window.location.search);
-  const userId = urlParams.get('user');
-  const fetchUserTasks = async () => {
-    const response = await axios.get(
-      `http://127.0.0.1:8000/tasks/${parseInt(userId)}`
-    );
-    const tasks = response.data;
-    console.log(tasks);
-    let tasksHTML = ``;
-    tasks.map((task) => {
-      tasksHTML += `<li class="list-group-item"><strong>${
-        task.name
-      }</strong> Deadline: ${task.deadline} , ${
-        task.done
-          ? '<i class="bi bi-check-circle-fill text-success"></i>'
-          : '<i class="bi bi-x-circle-fill text-danger"></i>'
-      }</li>`;
-    });
-    tasksList.innerHTML = tasksHTML;
-  };
-  fetchUserTasks();
+  document.addEventListener('DOMContentLoaded', () => {
+    const tasksList = document.getElementById('tasksList');
+    const fetchTasks = async () => {
+      const tasks = await apiRequest(`http://127.0.0.1:8000/tasks/`);
+      let tasksHTML = ``;
+      tasks.map((task) => {
+        tasksHTML += `<li class="list-group-item"><strong>${
+          task.name
+        }</strong> Deadline: ${task.deadline}  ${
+          task.done
+            ? '<i class="bi bi-check-circle-fill text-success"></i>'
+            : '<i class="bi bi-x-circle-fill text-danger"></i>'
+        }</li>`;
+      });
+      tasksList.innerHTML = tasksHTML;
+    };
+    fetchTasks();
+  });
 </script>
